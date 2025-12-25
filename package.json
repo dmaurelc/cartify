@@ -16,29 +16,30 @@
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0",
-    "npm": ">=10.0.0"
+    "pnpm": ">=8.0.0"
   },
+  "packageManager": "pnpm@8.15.0",
   "workspaces": [
     "src/frontend",
     "src/backend"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=src/frontend & npm run dev --workspace=src/backend",
-    "build": "npm run build --workspace=src/frontend && npm run build --workspace=src/backend",
-    "start": "npm run start --workspace=src/backend",
-    "test": "npm run test --workspace=src/frontend && npm run test --workspace=src/backend",
-    "test:watch": "npm run test:watch --workspace=src/frontend & npm run test:watch --workspace=src/backend",
-    "test:coverage": "npm run test:coverage --workspace=src/frontend && npm run test:coverage --workspace=src/backend",
-    "lint": "npm run lint --workspace=src/frontend && npm run lint --workspace=src/backend",
-    "format": "npm run format --workspace=src/frontend && npm run format --workspace=src/backend",
-    "type-check": "npm run type-check --workspace=src/frontend && npm run type-check --workspace=src/backend",
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "start": "pnpm --filter ./src/backend start",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm -r test:watch",
+    "test:coverage": "pnpm -r test:coverage",
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "type-check": "pnpm -r type-check",
     "docker:build": "docker-compose -f docker/docker-compose.yml build",
     "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
     "docker:down": "docker-compose -f docker/docker-compose.yml down",
     "docker:logs": "docker-compose -f docker/docker-compose.yml logs -f",
-    "db:migrate": "npm run db:migrate --workspace=src/backend",
-    "db:seed": "npm run db:seed --workspace=src/backend",
-    "db:reset": "npm run db:reset --workspace=src/backend"
+    "db:migrate": "pnpm --filter ./src/backend db:migrate",
+    "db:seed": "pnpm --filter ./src/backend db:seed",
+    "db:reset": "pnpm --filter ./src/backend db:reset"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.13.1",

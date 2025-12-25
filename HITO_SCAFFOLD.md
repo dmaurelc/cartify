@@ -179,28 +179,28 @@ cartify/
 ```bash
 cd /Users/danielmc/Desktop/ProyectosAstro/cartify
 
-# Instalar dependencias
-npm install
+# Instalar dependencias con pnpm
+pnpm install
 
 # Levantar servicios
 docker-compose -f docker/docker-compose.yml up -d
 
 # Generar Prisma client
-cd src/backend && npm run prisma:generate && cd ../..
+cd src/backend && pnpm prisma:generate && cd ../..
 
 # Iniciar desarrollo
-npm run dev
+pnpm dev
 ```
 
 ### Opción 2: Sin Docker
 ```bash
-npm install
+pnpm install
 
 # Terminal 1: Frontend
-cd src/frontend && npm run dev
+cd src/frontend && pnpm dev
 
 # Terminal 2: Backend
-cd src/backend && npm run dev
+cd src/backend && pnpm dev
 
 # Requiere PostgreSQL y Redis instalados localmente
 ```

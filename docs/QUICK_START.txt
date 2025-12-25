@@ -192,8 +192,8 @@
 🚀 CONFIGURACIÓN LOCAL:
 ═══════════════════════════════════════════════════════════════════════════════
 
-  # 1. Instalar dependencias del monorepo
-  npm install
+  # 1. Instalar dependencias del monorepo con pnpm
+  pnpm install
 
   # 2. Copiar archivo .env
   cp src/backend/.env.example src/backend/.env.local
@@ -202,13 +202,13 @@
   docker-compose -f docker/docker-compose.yml up -d
 
   # 4. Instalar Prisma y generar cliente
-  cd src/backend && npm run prisma:generate
+  cd src/backend && pnpm prisma:generate
 
   # 5. Aplicar migraciones (cuando existan)
-  npm run db:migrate
+  pnpm db:migrate
 
   # 6. Iniciar desarrollo en paralelo
-  npm run dev
+  pnpm dev
 
   # Frontend:  http://localhost:3000
   # Backend:   http://localhost:3001

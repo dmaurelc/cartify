@@ -173,7 +173,7 @@ Se ha creado un sistema completo de coordinación:
 Para comenzar el desarrollo necesitarás:
 
 - **Node.js** 20+
-- **npm** o **yarn**
+- **pnpm** 8.0+
 - **Docker** & **Docker Compose**
 - **Git**
 - **VS Code** (recomendado) + extensión Claude Code

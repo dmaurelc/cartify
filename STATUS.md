@@ -299,15 +299,15 @@ Se han establecido reglas del proyecto en `REGLAS_PROYECTO.md`:
 
 **Opción 1: Local (sin Docker)**
 ```bash
-npm install
-cd src/frontend && npm run dev      # Terminal 1
-cd src/backend && npm run dev        # Terminal 2
+pnpm install
+cd src/frontend && pnpm dev      # Terminal 1
+cd src/backend && pnpm dev        # Terminal 2
 ```
 
 **Opción 2: Con Docker**
 ```bash
 docker-compose -f docker/docker-compose.yml up -d
-npm run dev
+pnpm dev
 ```
 
 **Accesos:**
