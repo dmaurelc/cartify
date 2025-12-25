@@ -9,13 +9,39 @@ y este proyecto se adhiere al [Versionado Semántico](https://semver.org/lang/es
 
 ## [Unreleased]
 
-### Planeado
-- Landing page con secciones completas
-- Sistema de autenticación
-- Carta digital pública
+### Planeado para v0.1.0
+- Landing page con secciones completas (Hero, Features, Testimonios)
+- Sistema de autenticación (Login, Registro, JWT)
+- Autenticación OAuth (Google, Apple)
+- Carta digital pública con QR
 - Panel de gestión de restaurante
 - Integración de pasarelas de pago
 - Panel de super administrador
+- Endpoints de API REST documentados
+- Tests unitarios e integración
+
+---
+
+## [0.0.0] - 2025-12-25 (Inicial)
+
+### Agregado (Added)
+- ✨ Scaffold inicial del proyecto cartify
+- ✨ Configuración de monorepo con npm workspaces
+- ✨ Setup frontend Next.js 14+ con TypeScript, Tailwind CSS, ESLint, Prettier
+- ✨ Setup backend NestJS con TypeScript, Prisma, JWT, CORS configurados
+- ✨ Esquema Prisma con 15+ modelos de dominio para multi-tenancia
+- ✨ Docker multi-stage para frontend y backend
+- ✨ Docker Compose con PostgreSQL 15, Redis 7, Frontend y Backend
+- ✨ Sistema de Agentes (Meta Orchestrator + 8 sub-agentes especializados)
+- ✨ Documentación completa (Plan, Roadmap, Ideas, Especificaciones)
+- ✨ Configuración de proyecto (EditorConfig, Prettier, GitIgnore)
+- ✨ Reglas del proyecto y estrategia de versionado semántico
+
+### Estado Inicial
+- Base de código limpia y lista para desarrollo
+- Ambiente local completamente funcional con Docker Compose
+- Documentación profesional en español
+- Estructura de carpetas lista para Phase 1
 
 ---
 
