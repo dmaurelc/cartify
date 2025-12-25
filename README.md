@@ -16,19 +16,20 @@ PDR es una solución integral que permite a restaurantes:
 ## 🚀 Comenzar
 
 ### Para Desarrolladores
-1. **Lee documentación:** [`docs/README.md`](docs/README.md)
-2. **Lee agentes:** [`.claude/README.md`](.claude/README.md)
-3. **Revisa especificaciones:** [`.reference/PDR_Portal_Restaurantes.md`](.reference/PDR_Portal_Restaurantes.md)
+1. **Inicio:** [`docs/COMENZAR_DESARROLLO.md`](docs/COMENZAR_DESARROLLO.md) ⭐ EMPEZAR AQUÍ
+2. **Docker:** [`docs/DOCKER_STATUS.md`](docs/DOCKER_STATUS.md)
+3. **Reglas:** [`docs/REGLAS_PROYECTO.md`](docs/REGLAS_PROYECTO.md)
 
 ### Para Project Managers
-1. **Plan:** [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md)
-2. **Roadmap:** [`docs/ROADMAP.md`](docs/ROADMAP.md)
-3. **Status:** [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
+1. **Roadmap Phase 1:** [`docs/FASE_1_ROADMAP.md`](docs/FASE_1_ROADMAP.md)
+2. **Status:** [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md)
+3. **Changelog:** [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
 
 ### Para Stakeholders
 1. **Overview:** [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) - Sección "Resumen Ejecutivo"
 2. **Timeline:** [`docs/ROADMAP.md`](docs/ROADMAP.md)
 3. **Ideas:** [`docs/IDEAS.md`](docs/IDEAS.md)
+4. **Hito Scaffold:** [`docs/HITO_SCAFFOLD.md`](docs/HITO_SCAFFOLD.md)
 
 ---
 
