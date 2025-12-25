@@ -5,17 +5,23 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copiar archivos de dependencias
-COPY src/backend/package*.json ./
+# Instalar pnpm
+RUN npm install -g pnpm@8.15.0
 
-# Instalar dependencias
-RUN npm ci
+# Copiar archivos de dependencias y lock file
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY src/backend/package.json ./src/backend/
+
+# Instalar dependencias con pnpm
+RUN pnpm install --frozen-lockfile
 
 # Copiar código fuente
-COPY src/backend/ .
+COPY src/backend/ ./src/backend/
 
 # Build
-RUN npm run build
+RUN pnpm --filter ./src/backend build
 
 # Stage 2: Production
 FROM node:20-alpine AS runner
@@ -25,16 +31,21 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
 
-# Instalar solo dependencias de producción
-COPY src/backend/package*.json ./
-RUN npm ci --omit=dev
+# Instalar pnpm
+RUN npm install -g pnpm@8.15.0
 
-# Instalar prisma
-RUN npm install @prisma/client
+# Copiar archivos de dependencias y lock file
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY src/backend/package.json ./src/backend/
+
+# Instalar solo dependencias de producción
+RUN pnpm install --frozen-lockfile --prod
 
 # Copiar build desde stage anterior
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/backend/prisma ./prisma
+COPY --from=builder /app/src/backend/dist ./src/backend/dist
+COPY --from=builder /app/src/backend/prisma ./src/backend/prisma
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
@@ -42,4 +53,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
 
 EXPOSE 3001
 
-CMD ["node", "dist/main"]
+CMD ["node", "src/backend/dist/main"]
