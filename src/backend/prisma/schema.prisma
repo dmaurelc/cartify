@@ -1,0 +1,461 @@
+// Prisma Schema para PDR - Portal Digital de Restaurantes
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================================================
+// MODELOS BASE
+// ============================================================================
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nombre    String
+  contraseña String
+
+  // Datos personales
+  telefono  String?
+  avatar    String?
+
+  // Estados
+  activo    Boolean  @default(true)
+  verificado Boolean @default(false)
+  rol       Rol      @default(CLIENTE)
+
+  // Timestamps
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  // Relaciones
+  restaurantes UsuarioRestaurante[]
+  pedidos      Pedido[]
+  sesiones     Sesion[]
+
+  @@index([email])
+  @@index([activo])
+}
+
+model Sesion {
+  id        String   @id @default(cuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  // Token refresh
+  refreshToken String @unique
+  expiradoEn   DateTime
+
+  // Timestamps
+  creadoEn  DateTime @default(now())
+
+  @@index([usuarioId])
+  @@index([expiradoEn])
+}
+
+// ============================================================================
+// RESTAURANTES
+// ============================================================================
+
+model Restaurante {
+  id        String   @id @default(cuid())
+
+  // Datos comerciales
+  nombre    String
+  slug      String   @unique
+  descripcion String?
+  email     String
+  telefono  String
+
+  // Ubicación
+  direccion String?
+  ciudad    String?
+  codigoPostal String?
+  pais      String?
+
+  // Visual
+  logo      String?
+  portada   String?
+  colorPrimario String? @default("#FF6B35")
+  colorSecundario String? @default("#004E89")
+
+  // Horarios
+  horarios  Horario[]
+
+  // Estados
+  activo    Boolean  @default(true)
+  estado    EstadoRestaurante @default(PENDIENTE)
+
+  // Timestamps
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  // Relaciones
+  usuarios UsuarioRestaurante[]
+  categorias Categoria[]
+  productos Producto[]
+  mesas Mesa[]
+  pedidos Pedido[]
+  metodoPago MetodoPago[]
+  planes Plan[]
+
+  @@index([slug])
+  @@index([activo])
+  @@index([estado])
+}
+
+model Horario {
+  id        String   @id @default(cuid())
+  restauranteId String
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  // Días de operación
+  dia       String   // LUNES, MARTES, etc.
+  apertura  String   // HH:MM
+  cierre    String   // HH:MM
+  cerrado   Boolean  @default(false)
+
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@unique([restauranteId, dia])
+}
+
+model UsuarioRestaurante {
+  id        String   @id @default(cuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  restauranteId String
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  // Rol en el restaurante
+  rol       RolRestaurante @default(ADMIN)
+  activo    Boolean @default(true)
+
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@unique([usuarioId, restauranteId])
+  @@index([usuarioId])
+  @@index([restauranteId])
+}
+
+// ============================================================================
+// MENÚ
+// ============================================================================
+
+model Categoria {
+  id        String   @id @default(cuid())
+  restauranteId String
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  // Datos
+  nombre    String
+  descripcion String?
+  imagen    String?
+  orden     Int      @default(0)
+
+  // Estados
+  activo    Boolean  @default(true)
+
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  // Relaciones
+  productos Producto[]
+
+  @@index([restauranteId])
+  @@index([activo])
+}
+
+model Producto {
+  id        String   @id @default(cuid())
+  restauranteId String
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  categoriaId String
+  categoria Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+
+  // Datos básicos
+  nombre    String
+  descripcion String?
+  imagen    String?
+  precio    Float
+
+  // Información
+  alérgenos String?
+  calorías  Int?
+  etiquetas String?  // vegetariano, vegano, sin_gluten, etc
+
+  // Disponibilidad
+  disponible Boolean @default(true)
+  stock     Int?
+
+  // Opciones
+  opciones  OpcionProducto[]
+
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  // Relaciones
+  itemPedidos ItemPedido[]
+
+  @@index([restauranteId])
+  @@index([categoriaId])
+  @@index([disponible])
+}
+
+model OpcionProducto {
+  id        String   @id @default(cuid())
+  productoId String
+  producto  Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  // Datos
+  nombre    String    // Tamaño, complemento, etc
+  esObligatoria Boolean @default(false)
+
+  // Valores de la opción
+  valores   ValorOpcion[]
+
+  creadoEn  DateTime @default(now())
+
+  @@index([productoId])
+}
+
+model ValorOpcion {
+  id        String   @id @default(cuid())
+  opcionId  String
+  opcion    OpcionProducto @relation(fields: [opcionId], references: [id], onDelete: Cascade)
+
+  // Datos
+  valor     String
+  precioAdicional Float @default(0)
+
+  creadoEn  DateTime @default(now())
+
+  @@index([opcionId])
+}
+
+// ============================================================================
+// PEDIDOS
+// ============================================================================
+
+model Mesa {
+  id        String   @id @default(cuid())
+  restauranteId String
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  // Datos
+  numero    String
+  codigoQR  String   @unique
+
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  // Relaciones
+  pedidos   Pedido[]
+
+  @@unique([restauranteId, numero])
+  @@index([restauranteId])
+}
+
+model Pedido {
+  id        String   @id @default(cuid())
+  restauranteId String
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  mesaId    String?
+  mesa      Mesa?   @relation(fields: [mesaId], references: [id], onDelete: SetNull)
+
+  // Datos del pedido
+  numero    String
+  estado    EstadoPedido @default(PENDIENTE)
+  subtotal  Float
+  impuesto  Float
+  total     Float
+  notas     String?
+
+  // Items
+  items     ItemPedido[]
+
+  // Pago
+  pago      Pago?
+  metodoPagoId String?
+  metodoPago MetodoPago? @relation(fields: [metodoPagoId], references: [id])
+
+  // Timestamps
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+  completadoEn DateTime?
+
+  @@index([restauranteId])
+  @@index([usuarioId])
+  @@index([mesaId])
+  @@index([estado])
+  @@index([numero])
+}
+
+model ItemPedido {
+  id        String   @id @default(cuid())
+  pedidoId  String
+  pedido    Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  productoId String
+  producto  Producto @relation(fields: [productoId], references: [id])
+
+  // Cantidad y precio
+  cantidad  Int
+  precioUnitario Float
+  subtotal Float
+
+  // Personalizaciones
+  personalizaciones String? // JSON con las opciones seleccionadas
+
+  creadoEn  DateTime @default(now())
+
+  @@index([pedidoId])
+  @@index([productoId])
+}
+
+// ============================================================================
+// PAGOS
+// ============================================================================
+
+model MetodoPago {
+  id        String   @id @default(cuid())
+  restauranteId String
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  // Tipo y datos
+  tipo      TipoMetodoPago
+  nombre    String
+  activo    Boolean  @default(true)
+
+  // Datos de configuración (encriptados en realidad)
+  datos     String?
+
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  // Relaciones
+  pedidos   Pedido[]
+
+  @@index([restauranteId])
+  @@index([tipo])
+}
+
+model Pago {
+  id        String   @id @default(cuid())
+  pedidoId  String   @unique
+  pedido    Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  // Datos del pago
+  monto     Float
+  estado    EstadoPago @default(PENDIENTE)
+
+  // Referencia externa
+  idTransaccion String?
+  proveedorPago String? // webpay, stripe, etc
+
+  // Respuesta del proveedor
+  respuesta String? // JSON con la respuesta
+
+  creadoEn  DateTime @default(now())
+  procesadoEn DateTime?
+
+  @@index([pedidoId])
+  @@index([estado])
+}
+
+// ============================================================================
+// PLANES Y SUSCRIPCIONES
+// ============================================================================
+
+model Plan {
+  id        String   @id @default(cuid())
+
+  // Datos del plan
+  nombre    String
+  descripcion String?
+  precio    Float
+  moneda    String   @default("USD")
+
+  // Límites
+  productosPorCategoria Int?
+  pedidosMensuales Int?
+  usuariosAdicionales Int?
+  dominioPersonalizado Boolean @default(false)
+  analyticsAvanzados Boolean @default(false)
+
+  activo    Boolean  @default(true)
+
+  creadoEn  DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  // Relaciones
+  restaurantes Restaurante[]
+
+  @@index([activo])
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum Rol {
+  SUPER_ADMIN
+  ADMIN
+  RESTAURANTE_ADMIN
+  PERSONAL_COCINA
+  MESERO
+  CLIENTE
+  CLIENTE_ANONIMO
+}
+
+enum RolRestaurante {
+  ADMIN
+  PERSONAL_COCINA
+  MESERO
+}
+
+enum EstadoRestaurante {
+  PENDIENTE
+  ACTIVO
+  SUSPENDIDO
+  ELIMINADO
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  CONFIRMADO
+  PREPARANDO
+  LISTO
+  ENTREGADO
+  CANCELADO
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PROCESANDO
+  COMPLETADO
+  FALLIDO
+  REEMBOLSADO
+}
+
+enum TipoMetodoPago {
+  EFECTIVO
+  TARJETA_CREDITO
+  TARJETA_DEBITO
+  TRANSFERENCIA_BANCARIA
+  BILLETERA_DIGITAL
+  WEBPAY
+  STRIPE
+}

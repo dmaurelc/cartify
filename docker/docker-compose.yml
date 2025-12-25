@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pdr-postgres
+    environment:
+      POSTGRES_USER: pdr_user
+      POSTGRES_PASSWORD: pdr_password_dev
+      POSTGRES_DB: pdr_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pdr_user -d pdr_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pdr-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: pdr-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pdr-network
+
+  # Backend API
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: pdr-backend
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://pdr_user:pdr_password_dev@postgres:5432/pdr_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-key-min-32-chars
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../src/backend/src:/app/src
+      - ../src/backend/prisma:/app/prisma
+    networks:
+      - pdr-network
+    command: npm run dev
+
+  # Frontend App
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: pdr-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ../src/frontend/src:/app/src
+      - ../src/frontend/public:/app/public
+    networks:
+      - pdr-network
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  pdr-network:
+    driver: bridge
